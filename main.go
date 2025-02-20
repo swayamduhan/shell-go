@@ -23,8 +23,12 @@ func handleCmd(cmd string){
 		builtins.HandleExit(tokens)
 	case "type":
 		builtins.HandleType(tokens)
+	case "pwd":
+		builtins.HandleWorkingDir()
+	case "":
+		fmt.Println("enter a command")
 	default: 
-		fmt.Fprint(os.Stderr, cmd + ": command not found\n")
+		builtins.RunExternalCmd(tokens)
 	}
 }
 
