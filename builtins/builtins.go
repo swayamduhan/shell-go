@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -15,7 +16,10 @@ var cmds = map[string]bool{
 	"exit" : true,
 	"type" : true,
 	"pwd" : true,
+	"cd" : true,
 }
+
+var lastDir string  // to store previous directory for "cd -"
 
 func HandleEcho(tokens []string) {
 	fmt.Println(strings.Join(tokens[1:], " "))
@@ -53,6 +57,41 @@ func HandleWorkingDir(){
 	fmt.Println(pwd)
 }
 
+func HandleChangeDir(tokens []string){
+	if len(tokens) > 2 {
+		fmt.Fprintf(os.Stderr, "cd: too many arguments\n")
+		return
+	}
+
+	var path string
+	if len(tokens) == 1 || tokens[1] == "~" {
+		path = os.Getenv("HOME")
+	} else if tokens[1] == "-" {
+		if lastDir == "" {
+			fmt.Fprintf(os.Stderr, "cd: OLDPWD not set\n")
+			return
+		}
+		path = lastDir
+	} else {
+		path = tokens[1]
+	}
+
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "cd: error resolving path: %v\n", err)
+		return
+	}
+
+	currDir, _ := os.Getwd()
+	lastDir = currDir
+
+
+	err = os.Chdir(absPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "cd: cannot access '%s': No such file or directory\n", path)
+	}
+}
+
 func RunExternalCmd(tokens []string){
 	if len(tokens) == 0 {
 		return
@@ -61,14 +100,17 @@ func RunExternalCmd(tokens []string){
 	var cmd *exec.Cmd
 
 	if runtime.GOOS == "windows" {
+		// check for bash if on a windows machine
 		if path, found := utils.HasBash(); found {
 			// uses git bash if installed
 			cmd = exec.Command(path, "-c", strings.Join(tokens, " "))
 		} else {
-			cmd = exec.Command("cmd", "/C", strings.Join(tokens, " "))
+			// no bash, use basic
+			cmd = exec.Command(tokens[0], tokens[1:]...)
 		}
 	} else {
-		cmd = exec.Command("sh", "-c", strings.Join(tokens, " "))
+		// basic for unix
+		cmd = exec.Command(tokens[0], tokens[1:]...)
 	}
 
 	cmd.Stdin = os.Stdin
