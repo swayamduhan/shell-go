@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/swayamduhan/shell-go/utils"
 )
 
 var lastDir string // to store previous directory for "cd -"
@@ -17,7 +19,7 @@ func HandleChangeDir(tokens []string) {
 
 	var path string
 	if len(tokens) == 1 || tokens[1] == "~" {
-		path = os.Getenv("HOME")
+		path, _ = utils.GetHomeDir()
 	} else if tokens[1] == "-" {
 		if lastDir == "" {
 			fmt.Fprintf(os.Stderr, "cd: OLDPWD not set\n")

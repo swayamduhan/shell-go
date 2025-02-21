@@ -6,7 +6,9 @@ import (
 	"log"
 	"os"
 	"strings"
+
 	"github.com/swayamduhan/shell-go/commands"
+	"github.com/swayamduhan/shell-go/utils"
 )
 
 const (
@@ -42,14 +44,24 @@ func handleCmd(cmd string){
 }
 
 
-
+// hide home directory
 // implement readline for handling autocompletion and syntax hightlighting
 func main() {
+
+	err := os.Chdir(os.Getenv("HOME"))
+	if err != nil {
+		fmt.Println("error getting home directory!")
+		return
+	}
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
-		path, _ := os.Getwd()
-		fmt.Printf("%s%s$%s %s%s%s> ", Bold, Green, Reset, Cyan, path, Reset)
+		path := utils.GetDir()
+		if path == "" {
+			path = "home"
+		}
+
+		fmt.Printf("%s%s%s> %s%s$%s ", Cyan, path, Reset, Bold, Green, Reset)
 		cmd, err := reader.ReadString('\n')
 		if err != nil {
 			log.Println("error reading command: ", err)
