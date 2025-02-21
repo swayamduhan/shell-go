@@ -6,8 +6,7 @@ import (
 	"log"
 	"os"
 	"strings"
-
-	"github.com/swayamduhan/shell-go/builtins"
+	"github.com/swayamduhan/shell-go/commands"
 )
 
 const (
@@ -26,22 +25,25 @@ func handleCmd(cmd string){
 	
 	switch tokens[0] {
 	case "echo":
-		builtins.HandleEcho(tokens)
+		commands.HandleEcho(tokens)
 	case "exit":
-		builtins.HandleExit(tokens)
+		commands.HandleExit(tokens)
 	case "type":
-		builtins.HandleType(tokens)
+		commands.HandleType(tokens)
 	case "pwd":
-		builtins.HandleWorkingDir()
+		commands.HandleWorkingDir()
 	case "cd":
-		builtins.HandleChangeDir(tokens)
+		commands.HandleChangeDir(tokens)
 	case "":
 		fmt.Println("enter a command")
 	default: 
-		builtins.RunExternalCmd(tokens)
+		commands.RunExternalCmd(tokens)
 	}
 }
 
+
+
+// implement readline for handling autocompletion and syntax hightlighting
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 
@@ -57,5 +59,5 @@ func main() {
 		cmd = strings.TrimSpace(cmd)
 		handleCmd(cmd)
 	}
-	
+
 }
