@@ -11,23 +11,23 @@ import (
 var lastDir string // to store previous directory for "cd -"
 
 // add a additional command using DLL for surfing forward and previous like a browser
-func HandleChangeDir(tokens []string) {
+func HandleChangeDir(tokens []utils.Token) {
 	if len(tokens) > 2 {
 		fmt.Fprintf(os.Stderr, "cd: too many arguments\n")
 		return
 	}
 
 	var path string
-	if len(tokens) == 1 || tokens[1] == "~" {
+	if len(tokens) == 1 || tokens[1].Value == "~" {
 		path, _ = utils.GetHomeDir()
-	} else if tokens[1] == "-" {
+	} else if tokens[1].Value == "-" {
 		if lastDir == "" {
 			fmt.Fprintf(os.Stderr, "cd: OLDPWD not set\n")
 			return
 		}
 		path = lastDir
 	} else {
-		path = tokens[1]
+		path = tokens[1].Value
 	}
 
 	absPath, err := filepath.Abs(path)

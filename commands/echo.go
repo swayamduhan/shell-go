@@ -2,9 +2,14 @@ package commands
 
 import (
 	"fmt"
-	"strings"
+
+	"github.com/swayamduhan/shell-go/utils"
 )
 
-func HandleEcho(tokens []string) {
-	fmt.Println(strings.Join(tokens[1:], " "))
+
+func HandleEcho(tokens []utils.Token) {
+	for _, token := range tokens[1:] {
+		fmt.Printf("%s ", token.Value)
+	}
+	fmt.Println()
 }

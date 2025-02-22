@@ -22,10 +22,9 @@ const (
 
 
 
-func handleCmd(cmd string){
-	tokens := strings.Split(cmd, " ")
+func handleBuiltinCmd(tokens []utils.Token){
 	
-	switch tokens[0] {
+	switch tokens[0].Value {
 	case "echo":
 		commands.HandleEcho(tokens)
 	case "exit":
@@ -36,25 +35,36 @@ func handleCmd(cmd string){
 		commands.HandleWorkingDir()
 	case "cd":
 		commands.HandleChangeDir(tokens)
-	case "":
+	default:
 		fmt.Println("enter a command")
-	default: 
-		commands.RunExternalCmd(tokens)
 	}
 }
 
 
-// hide home directory
-// implement readline for handling autocompletion and syntax hightlighting
+// add stack based balancing to check for incomplete commands ( quotations and parenthesis ) and let user complete the line
+// implement readline for handling autocompletion and syntax 
+
+
+// FLOW : 
+// 1. read line
+// 2. check balancing
+// 3. if balanced, then tokenize and send for command
+// 4. if unbalanced, then ask again for complete input, append it to previously entered string and send for command if balanced
+
+
+var balanced = false
+
 func main() {
 
-	err := os.Chdir(os.Getenv("HOME"))
+	// set home directory when terminal starts
+	home, err := utils.GetHomeDir()
 	if err != nil {
 		fmt.Println("error getting home directory!")
 		return
 	}
-	reader := bufio.NewReader(os.Stdin)
+	os.Chdir(home)
 
+	reader := bufio.NewReader(os.Stdin)
 	for {
 		path := utils.GetDir()
 		if path == "" {
@@ -68,8 +78,16 @@ func main() {
 			os.Exit(-1)
 		}
 
+		
 		cmd = strings.TrimSpace(cmd)
-		handleCmd(cmd)
+
+		if commands.IsBuiltin(cmd) {
+			// tokenize and pass in the command
+			tokenizedInstruction := utils.Tokenize(cmd)
+			handleBuiltinCmd(tokenizedInstruction)
+		} else {
+			commands.RunExternalCmd(strings.Split(cmd, " "))
+		}
 	}
 
 }
