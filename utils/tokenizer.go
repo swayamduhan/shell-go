@@ -56,8 +56,9 @@ func Tokenize(args string) []Token {
 			// add to token if inside quotes
 			// append token to array if not empty, and add a type to it
 			// hasSpace = true if outside quotes
-			if insideDoubleQuote || insideSingleQuote {
+			if insideDoubleQuote || insideSingleQuote || escape {
 				currentToken.WriteRune(r)
+				escape = false
 				continue
 			}	
 			if currentToken.String() != "" {

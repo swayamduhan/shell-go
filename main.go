@@ -86,7 +86,7 @@ func main() {
 			tokenizedInstruction := utils.Tokenize(cmd)
 			handleBuiltinCmd(tokenizedInstruction)
 		} else {
-			commands.RunExternalCmd(strings.Split(cmd, " "))
+			commands.RunExternalCmd(cmd)
 		}
 	}
 

@@ -5,14 +5,12 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
-	"strings"
 
 	"github.com/swayamduhan/shell-go/utils"
 )
 
-
-func RunExternalCmd(tokens []string){
-	if len(tokens) == 0 {
+func RunExternalCmd(inputCmd string){
+	if inputCmd == "" {
 		return
 	}
 
@@ -22,14 +20,14 @@ func RunExternalCmd(tokens []string){
 		// check for bash if on a windows machine
 		if path, found := utils.HasBash(); found {
 			// uses git bash if installed
-			cmd = exec.Command(path, "-c", strings.Join(tokens, " "))
+			cmd = exec.Command(path, "-c", inputCmd)
 		} else {
 			// no bash, use basic
-			cmd = exec.Command(tokens[0], tokens[1:]...)
+			cmd = exec.Command("cmd", "/C", inputCmd)
 		}
 	} else {
 		// basic for unix
-		cmd = exec.Command(tokens[0], tokens[1:]...)
+		cmd = exec.Command("sh", "-c", inputCmd)
 	}
 
 	cmd.Stdin = os.Stdin
@@ -39,7 +37,7 @@ func RunExternalCmd(tokens []string){
 	err := cmd.Run()
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s: error executing command: %v\n", tokens[0], err)
+		fmt.Fprintf(os.Stderr, "%v\n", err)
 	}
 }
 
